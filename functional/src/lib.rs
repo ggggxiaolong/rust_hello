@@ -18,7 +18,7 @@ mod test {
 
     #[test]
     fn test_cache() {
-        let mut cache = Cache::new(|num|num);
+        let mut cache = Cache::new(|num| num);
         cache.value(1);
         let value2 = cache.value(1);
 
@@ -26,11 +26,32 @@ mod test {
     }
 
     #[test]
-    fn iterator_sum(){
+    fn iterator_sum() {
         let v1 = vec![1, 2, 3];
         let v1_iter = v1.iter();
         let total = v1_iter.sum();
         assert_eq!(6, total);
+    }
+
+    #[test]
+    fn calling_next_directory() {
+        let mut counter = Counter::new();
+        assert_eq!(counter.next(), Some(1));
+        assert_eq!(counter.next(), Some(2));
+        assert_eq!(counter.next(), Some(3));
+        assert_eq!(counter.next(), Some(4));
+        assert_eq!(counter.next(), Some(5));
+        assert_eq!(counter.next(), None);
+    }
+
+    #[test]
+    fn using_other_iterator_trait_methods() {
+        let sum: u32 = Counter::new()
+            .zip(Counter::new().skip(1))
+            .map(|(x, y)| x * y)
+            .filter(|x| x % 3 == 0)
+            .sum();
+        assert_eq!(18, sum);
     }
 }
 
@@ -47,7 +68,10 @@ pub fn generate_workout(indensity: u32, random_number: u32) {
         if random_number == 3 {
             println!("Take a break today! Remember to stay hydrated!")
         } else {
-            println!("Today, run for {} minutes!", expensive_result.value(indensity));
+            println!(
+                "Today, run for {} minutes!",
+                expensive_result.value(indensity)
+            );
         }
     }
 }
@@ -60,22 +84,47 @@ where
     value: Option<u32>,
 }
 
-impl<T> Cache<T> where T: Fn(u32) -> u32 {
-    fn new(calculation: T) -> Cache<T>{
-        Cache{
+impl<T> Cache<T>
+where
+    T: Fn(u32) -> u32,
+{
+    fn new(calculation: T) -> Cache<T> {
+        Cache {
             calculation,
             value: None,
         }
     }
 
     fn value(&mut self, arg: u32) -> u32 {
-        match self.value{
+        match self.value {
             Some(v) => v,
             None => {
                 let v = (self.calculation)(arg);
                 self.value = Some(v);
                 v
             }
+        }
+    }
+}
+
+struct Counter {
+    count: u32,
+}
+
+impl Counter {
+    fn new() -> Counter {
+        Counter { count: 0 }
+    }
+}
+
+impl Iterator for Counter {
+    type Item = u32;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.count += 1;
+        if self.count < 6 {
+            Some(self.count)
+        } else {
+            None
         }
     }
 }
