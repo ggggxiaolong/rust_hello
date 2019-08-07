@@ -32,6 +32,16 @@ impl<'a, T> LimitTracker<'a, T> where T: Messager {
     }
 }
 
+use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    parent: RefCell<Weak<Node>>,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -58,5 +68,17 @@ mod tests {
         let mut limit_tracker = LimitTracker::new(&mock_messager, 100);
         limit_tracker.set_value(80);
         assert_eq!(mock_messager.send_messages.borrow().len(), 1);
+    }
+
+    #[test]
+    fn test_node(){
+        let leaf = Rc::new(
+            Node{
+                value:3,
+                parent: RefCell::new(Weak::new()),
+                children: RefCell::new(vec![]),
+            }
+        );
+        println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
     }
 }
