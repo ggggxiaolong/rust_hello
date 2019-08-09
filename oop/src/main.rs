@@ -1,5 +1,5 @@
 use gui::{Button, Draw, Screen};
-use blog::{Post, DrafPost, PendingReviewPost};
+use blog::{Post};
 
 fn main() {
     test_post();
@@ -13,7 +13,7 @@ fn test_post(){
     println!("{}", post.content());
 }
 
-fn test_screen(){
+fn _test_screen(){
     let screen = Screen {
         components: vec![
             Box::new(SelectBox {
